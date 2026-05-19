@@ -1,7 +1,12 @@
 bin/
 dist/
 cover.out
+cover*.out
+coverage.html
+*.test
+*.prof
 *.vault
 .env
 .idea/
 .vscode/
+.DS_Store
