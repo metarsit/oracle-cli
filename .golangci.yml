@@ -1,0 +1,20 @@
+version: "2"
+run:
+  timeout: 5m
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - gosec
+    - staticcheck
+    - revive
+    - gocritic
+    - bodyclose
+    - ineffassign
+    - unconvert
+  disable:
+    - gochecknoglobals
+linters-settings:
+  gosec:
+    excludes:
+      - G104  # already covered by errcheck
