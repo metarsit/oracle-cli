@@ -24,6 +24,15 @@ func NewRootCmd(version string) *cobra.Command {
 		newConfigCmd(),
 		newHealthCmd(),
 		newReadyCmd(),
+		newStatusCmd(),
+		newInstrumentsCmd(),
+		newPriceCmd(),
+		newBookCmd(),
+		newSuggestCmd(),
+		newEngineCmd(),
+		newSettleCmd(),
+		newHedgeCmd(),
+		newPositionsCmd(),
 	)
 	return cmd
 }
