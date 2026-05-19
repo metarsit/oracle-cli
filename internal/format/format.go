@@ -18,6 +18,8 @@ func NewRenderer(name string) Renderer {
 	switch name {
 	case "json":
 		return jsonRenderer{}
+	case "yaml":
+		return yamlRenderer{}
 	}
 	return jsonRenderer{}
 }
