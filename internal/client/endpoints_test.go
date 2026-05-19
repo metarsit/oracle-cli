@@ -21,7 +21,7 @@ func TestHealthSkipsAuth(t *testing.T) {
 		if r.Header.Get("Authorization") != "" {
 			t.Errorf("unexpected auth header on /healthz")
 		}
-		w.Write([]byte(`{"data":{"ok":true},"meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":{"ok":true},"meta":{}}`))
 	}))
 	if _, err := c.Health(t.Context()); err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestSuggestionLatestPassesQuery(t *testing.T) {
 		if got := r.URL.Query().Get("asset"); got != "BTC" {
 			t.Errorf("asset = %q", got)
 		}
-		w.Write([]byte(`{"data":{"id":1,"asset":"BTC","chosen_expiry":"T+1"},"meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":{"id":1,"asset":"BTC","chosen_expiry":"T+1"},"meta":{}}`))
 	}))
 	got, err := c.SuggestionLatest(t.Context(), "BTC")
 	if err != nil {
@@ -52,7 +52,7 @@ func TestEngineRunPosts(t *testing.T) {
 		if !strings.HasSuffix(r.URL.Path, "/v1/engine/run") {
 			t.Errorf("path = %s", r.URL.Path)
 		}
-		w.Write([]byte(`{"data":{"started":true},"meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":{"started":true},"meta":{}}`))
 	}))
 	if err := c.EngineRun(t.Context()); err != nil {
 		t.Fatal(err)

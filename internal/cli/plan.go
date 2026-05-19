@@ -1,4 +1,3 @@
-// internal/cli/plan.go
 package cli
 
 import (

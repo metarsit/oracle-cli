@@ -1,4 +1,4 @@
-// internal/deribit/account.go
+// Package deribit provides an OAuth2 client for the Deribit API.
 package deribit
 
 import (

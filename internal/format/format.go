@@ -1,4 +1,4 @@
-// internal/format/format.go
+// Package format renders CLI output in json, yaml, or table form.
 package format
 
 import (

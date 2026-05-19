@@ -1,4 +1,3 @@
-// internal/cli/config.go
 package cli
 
 import (
@@ -16,7 +15,7 @@ func configPath(cmd *cobra.Command) string {
 	if v := os.Getenv("ORACLE_CONFIG"); v != "" {
 		return v
 	}
-	return config.ConfigPath()
+	return config.Path()
 }
 
 func newConfigCmd() *cobra.Command {
@@ -34,10 +33,10 @@ func newConfigShowCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "base_url = %q\n", f.BaseURL)
-			fmt.Fprintf(cmd.OutOrStdout(), "deribit_base_url = %q\n", f.DeribitBaseURL)
-			fmt.Fprintf(cmd.OutOrStdout(), "output = %q\n", f.Output)
-			fmt.Fprintf(cmd.OutOrStdout(), "timeout = %q\n", f.Timeout)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "base_url = %q\n", f.BaseURL)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "deribit_base_url = %q\n", f.DeribitBaseURL)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "output = %q\n", f.Output)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "timeout = %q\n", f.Timeout)
 			return nil
 		},
 	}
@@ -56,7 +55,7 @@ func newConfigGetCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), v)
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), v)
 			return nil
 		},
 	}

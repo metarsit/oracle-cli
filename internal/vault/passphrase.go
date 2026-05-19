@@ -1,4 +1,3 @@
-// internal/vault/passphrase.go
 package vault
 
 import (
@@ -9,7 +8,7 @@ import (
 	"golang.org/x/term"
 )
 
-const envPassphrase = "ORACLE_VAULT_PASSPHRASE"
+const envPassphrase = "ORACLE_VAULT_PASSPHRASE" //nolint:gosec // not a credential; it is the env var name that holds one
 
 // ErrPassphraseUnavailable is returned when no passphrase source is reachable.
 var ErrPassphraseUnavailable = errors.New("vault: no passphrase available; set ORACLE_VAULT_PASSPHRASE or run interactively")
@@ -22,6 +21,7 @@ type Prompter interface {
 // TermPrompter reads from /dev/tty with echo off.
 type TermPrompter struct{}
 
+// Prompt writes label to stderr and reads a password from stdin without echo.
 func (TermPrompter) Prompt(label string) ([]byte, error) {
 	fmt.Fprint(os.Stderr, label)
 	pw, err := term.ReadPassword(int(os.Stdin.Fd()))

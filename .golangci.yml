@@ -14,7 +14,7 @@ linters:
     - unconvert
   disable:
     - gochecknoglobals
-linters-settings:
-  gosec:
-    excludes:
-      - G104  # already covered by errcheck
+  settings:
+    gosec:
+      excludes:
+        - G104  # already covered by errcheck

@@ -1,4 +1,3 @@
-// internal/cli/health.go
 package cli
 
 import (

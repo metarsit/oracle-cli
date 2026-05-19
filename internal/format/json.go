@@ -1,4 +1,3 @@
-// internal/format/json.go
 package format
 
 import (

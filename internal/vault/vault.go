@@ -1,4 +1,4 @@
-// internal/vault/vault.go
+// Package vault implements AES-256-GCM encrypted secret storage.
 package vault
 
 import (

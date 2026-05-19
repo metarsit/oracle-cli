@@ -1,4 +1,3 @@
-// internal/cli/deribit.go
 package cli
 
 import (

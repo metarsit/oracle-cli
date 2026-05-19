@@ -1,4 +1,3 @@
-// internal/cli/hedge.go
 package cli
 
 import (

@@ -1,4 +1,4 @@
-// internal/config/config.go
+// Package config handles loading and resolving CLI configuration.
 package config
 
 import (

@@ -1,4 +1,3 @@
-// internal/cli/vault.go
 package cli
 
 import (
@@ -122,7 +121,7 @@ func newVaultListCmd() *cobra.Command {
 				return err
 			}
 			for _, k := range v.Keys() {
-				fmt.Fprintln(cmd.OutOrStdout(), k)
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), k)
 			}
 			return nil
 		},
@@ -192,7 +191,7 @@ func newVaultExportCmd() *cobra.Command {
 			}
 			for _, k := range v.Keys() {
 				val, _ := v.Get(k)
-				fmt.Fprintf(cmd.OutOrStdout(), "%s = %q\n", k, val)
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s = %q\n", k, val)
 			}
 			return nil
 		},

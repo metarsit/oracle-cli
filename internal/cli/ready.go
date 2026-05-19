@@ -1,4 +1,3 @@
-// internal/cli/ready.go
 package cli
 
 import (

@@ -1,4 +1,3 @@
-// internal/format/yaml.go
 package format
 
 import (

@@ -1,4 +1,3 @@
-// internal/cli/root.go
 package cli
 
 import "github.com/spf13/cobra"

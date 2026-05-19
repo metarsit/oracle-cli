@@ -1,4 +1,3 @@
-// internal/cli/settle.go
 package cli
 
 import (

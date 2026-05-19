@@ -1,4 +1,3 @@
-// internal/config/resolve.go
 package config
 
 import (

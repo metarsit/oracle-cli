@@ -53,8 +53,8 @@ func TestOpenCorruptCiphertext(t *testing.T) {
 	if err := Save(p, NewEmpty(), []byte("pw")); err != nil {
 		t.Fatal(err)
 	}
-	b, _ := os.ReadFile(p)
-	b[len(b)-1] ^= 0xFF // flip last byte
+	b, _ := os.ReadFile(p) //nolint:gosec // p is a tempfile path controlled by this test
+	b[len(b)-1] ^= 0xFF    // flip last byte
 	_ = os.WriteFile(p, b, 0o600)
 	_, err := Open(p, []byte("pw"))
 	if !errors.Is(err, ErrAuthFailed) {
@@ -67,7 +67,7 @@ func TestOpenRejectsLoosePerms(t *testing.T) {
 	if err := Save(p, NewEmpty(), []byte("pw")); err != nil {
 		t.Fatal(err)
 	}
-	_ = os.Chmod(p, 0o644)
+	_ = os.Chmod(p, 0o644) //nolint:gosec // deliberately setting insecure perms to trigger ErrInsecurePerm
 	_, err := Open(p, []byte("pw"))
 	if !errors.Is(err, ErrInsecurePerm) {
 		t.Errorf("want ErrInsecurePerm, got %v", err)
@@ -105,7 +105,7 @@ func TestOpenCtLenMismatch(t *testing.T) {
 	if err := Save(p, NewEmpty(), []byte("pw")); err != nil {
 		t.Fatal(err)
 	}
-	raw, _ := os.ReadFile(p)
+	raw, _ := os.ReadFile(p) //nolint:gosec // p is a tempfile path controlled by this test
 	// chop off one byte of ciphertext
 	if err := os.WriteFile(p, raw[:len(raw)-1], 0o600); err != nil {
 		t.Fatal(err)
@@ -191,7 +191,7 @@ func FuzzOpen(f *testing.F) {
 	if err := Save(good, v, []byte("pw")); err != nil {
 		f.Fatal(err)
 	}
-	realBytes, err := os.ReadFile(good)
+	realBytes, err := os.ReadFile(good) //nolint:gosec // good is a tempfile path controlled by this test
 	if err != nil {
 		f.Fatal(err)
 	}

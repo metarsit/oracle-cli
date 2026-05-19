@@ -1,4 +1,4 @@
-// internal/client/client.go
+// Package client provides an HTTP client for the oracle API.
 package client
 
 import (
@@ -118,6 +118,6 @@ func redactErr(err error, token string) error {
 }
 
 func contains(s, sub string) bool { return len(sub) > 0 && bytes.Contains([]byte(s), []byte(sub)) }
-func replace(s, old, new string) string {
-	return string(bytes.ReplaceAll([]byte(s), []byte(old), []byte(new)))
+func replace(s, old, repl string) string {
+	return string(bytes.ReplaceAll([]byte(s), []byte(old), []byte(repl)))
 }

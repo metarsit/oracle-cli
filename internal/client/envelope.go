@@ -1,4 +1,3 @@
-// internal/client/envelope.go
 package client
 
 import (
@@ -28,12 +27,12 @@ func DecodeEnvelope(body []byte, status int, out any) error {
 		if env.Error != nil {
 			code, msg = env.Error.Code, env.Error.Message
 		}
-		switch {
-		case status == 401 || status == 403:
+		switch status {
+		case 401, 403:
 			return &ErrAuth{Status: status, Msg: msg}
-		case status == 404:
+		case 404:
 			return &ErrNotFound{Msg: msg}
-		case status == 503:
+		case 503:
 			return &ErrDegraded{Status: status, Msg: msg}
 		}
 		return &ErrAPI{Code: code, Msg: msg, Status: status}

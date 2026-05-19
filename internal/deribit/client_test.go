@@ -11,7 +11,7 @@ import (
 )
 
 func TestAuthFailureReturnsError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`{"error":{"code":13004,"message":"invalid_credentials"}}`))
 	}))
 	defer srv.Close()

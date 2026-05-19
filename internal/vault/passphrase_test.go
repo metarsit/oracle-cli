@@ -51,11 +51,10 @@ func (s staticPrompter) Prompt(string) ([]byte, error) { return []byte(s), nil }
 // term.ReadPassword; here we only assert it satisfies the Prompter contract.
 // The Prompt method is documented as covered by manual + interactive tests.
 // LINT:ignore-coverage — TTY-bound function.
-func TestTermPrompterType(t *testing.T) {
+func TestTermPrompterType(_ *testing.T) {
+	// Compile-time assertion: TermPrompter satisfies Prompter.
 	var p Prompter = TermPrompter{}
-	if p == nil {
-		t.Fatal("TermPrompter should satisfy Prompter interface")
-	}
+	_ = p
 }
 
 func TestTermPrompterPromptSkipWithoutTTY(t *testing.T) {

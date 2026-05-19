@@ -27,15 +27,19 @@ func TestMain(m *testing.M) {
 		// Skip the heavy build when -short; integration tests below also skip.
 		os.Exit(m.Run())
 	}
+	os.Exit(runTestMain(m))
+}
+
+func runTestMain(m *testing.M) int {
 	dir, err := os.MkdirTemp("", "oracle-int-bin-*")
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(dir)
+	defer func() { _ = os.RemoveAll(dir) }()
 	binPath = filepath.Join(dir, "oracle_test_bin")
 	// Build with -cover so the child process emits coverage units into the
 	// directory pointed at by GOCOVERDIR (set per-invocation in runBinary).
-	cmd := exec.Command("go", "build", "-cover", "-o", binPath, ".")
+	cmd := exec.Command("go", "build", "-cover", "-o", binPath, ".") //nolint:gosec // controlled build invocation
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -46,7 +50,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(covDir)
+	defer func() { _ = os.RemoveAll(covDir) }()
 	coverDir = covDir
 	code := m.Run()
 	// If a coverage profile is being written, dump subprocess units into it
@@ -54,12 +58,12 @@ func TestMain(m *testing.M) {
 	if target := coverageProfileArg(); target != "" {
 		entries, _ := os.ReadDir(covDir)
 		if len(entries) > 0 {
-			dumpCmd := exec.Command("go", "tool", "covdata", "textfmt",
+			dumpCmd := exec.Command("go", "tool", "covdata", "textfmt", //nolint:gosec // controlled tool invocation with sanitised args
 				"-i="+covDir, "-o="+target+".sub")
 			_ = dumpCmd.Run()
 			// Append subprocess profile (skip mode line) onto main profile.
-			if extra, err := os.ReadFile(target + ".sub"); err == nil {
-				if main, err := os.OpenFile(target, os.O_APPEND|os.O_WRONLY, 0o644); err == nil {
+			if extra, err := os.ReadFile(target + ".sub"); err == nil { //nolint:gosec // path derived from test flag
+				if main, err := os.OpenFile(target, os.O_APPEND|os.O_WRONLY, 0o644); err == nil { //nolint:gosec // path derived from test flag
 					// strip first line (mode: ...) of the extra profile
 					if i := bytesIndexNewline(extra); i >= 0 {
 						_, _ = main.Write(extra[i+1:])
@@ -70,7 +74,7 @@ func TestMain(m *testing.M) {
 			}
 		}
 	}
-	os.Exit(code)
+	return code
 }
 
 // coverageProfileArg returns the value of -test.coverprofile if set.
@@ -126,7 +130,7 @@ func integrationOracle(t *testing.T, status int, body string) *httptest.Server {
 
 func runBinary(t *testing.T, env []string, args ...string) (string, string, int) {
 	t.Helper()
-	cmd := exec.Command(binPath, args...)
+	cmd := exec.Command(binPath, args...) //nolint:gosec // binPath is the test binary built by this test suite
 	envAll := append(os.Environ(), env...)
 	if coverDir != "" {
 		envAll = append(envAll, "GOCOVERDIR="+coverDir)

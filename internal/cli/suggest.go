@@ -1,4 +1,3 @@
-// internal/cli/suggest.go
 package cli
 
 import (

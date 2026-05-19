@@ -1,4 +1,3 @@
-// internal/cli/price.go
 package cli
 
 import (

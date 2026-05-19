@@ -1,4 +1,3 @@
-// internal/cli/version.go
 package cli
 
 import (

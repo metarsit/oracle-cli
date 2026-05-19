@@ -169,7 +169,7 @@ func FuzzDecodeEnvelope(f *testing.F) {
 			f.Add(s, status)
 		}
 	}
-	f.Fuzz(func(t *testing.T, body []byte, status int) {
+	f.Fuzz(func(_ *testing.T, body []byte, status int) {
 		var out struct{ X int }
 		// Must not panic for any input — error is fine.
 		_ = DecodeEnvelope(body, status, &out)

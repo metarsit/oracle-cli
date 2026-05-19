@@ -1,4 +1,3 @@
-// internal/deribit/client.go
 package deribit
 
 import (
@@ -58,7 +57,7 @@ func (c *Client) authToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("auth: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	var parsed struct {
 		Result struct {
@@ -99,7 +98,7 @@ func (c *Client) privateGet(ctx context.Context, path string, query url.Values, 
 	if err != nil {
 		return fmt.Errorf("deribit get: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 10<<20))
 	if resp.StatusCode == 401 || resp.StatusCode == 403 {
 		return fmt.Errorf("deribit auth failed: %s", string(body))

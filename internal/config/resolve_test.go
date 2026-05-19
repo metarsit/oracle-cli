@@ -50,7 +50,7 @@ func TestResolveFlagBeatsAll(t *testing.T) {
 // value is non-empty, it must beat env, vault, and file regardless of what
 // any of those carry. We feed 50 randomised inputs and assert the postcondition.
 func TestResolvePropertyFlagAlwaysWins(t *testing.T) {
-	rng := rand.New(rand.NewSource(1))
+	rng := rand.New(rand.NewSource(1)) //nolint:gosec // deterministic seed is intentional for reproducible property tests
 
 	// pool of values used across all sources to ensure they often collide
 	pool := []string{"alpha", "beta", "gamma", "delta", "", "epsilon"}

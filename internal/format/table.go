@@ -1,4 +1,3 @@
-// internal/format/table.go
 package format
 
 import (

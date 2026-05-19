@@ -1,4 +1,3 @@
-// internal/cli/status.go
 package cli
 
 import (

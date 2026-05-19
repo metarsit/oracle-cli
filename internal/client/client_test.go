@@ -15,7 +15,7 @@ func TestGetSendsBearer(t *testing.T) {
 	gotAuth := ""
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotAuth = r.Header.Get("Authorization")
-		w.Write([]byte(`{"data":{"ok":true},"meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":{"ok":true},"meta":{}}`))
 	}))
 	defer srv.Close()
 
@@ -31,7 +31,7 @@ func TestGetSendsBearer(t *testing.T) {
 
 func TestGetNetworkErrorRetriesOnce(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		n := calls.Add(1)
 		if n == 1 {
 			hj, _ := w.(http.Hijacker)
@@ -39,7 +39,7 @@ func TestGetNetworkErrorRetriesOnce(t *testing.T) {
 			_ = conn.Close()
 			return
 		}
-		w.Write([]byte(`{"data":{},"meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":{},"meta":{}}`))
 	}))
 	defer srv.Close()
 
@@ -55,7 +55,7 @@ func TestGetNetworkErrorRetriesOnce(t *testing.T) {
 
 func TestPostNoRetry(t *testing.T) {
 	var calls atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls.Add(1)
 		hj, _ := w.(http.Hijacker)
 		conn, _, _ := hj.Hijack()
@@ -93,7 +93,7 @@ func TestRedactBearerInError(t *testing.T) {
 func TestBodyCapEnforced(t *testing.T) {
 	huge := strings.Repeat("a", 11*1024*1024) // 11 MiB
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte(`{"data":"` + huge + `","meta":{}}`))
+		_, _ = w.Write([]byte(`{"data":"` + huge + `","meta":{}}`))
 	}))
 	defer srv.Close()
 	c := New(srv.URL, "tok", 5*time.Second)

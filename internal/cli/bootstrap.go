@@ -1,4 +1,4 @@
-// internal/cli/bootstrap.go
+// Package cli implements the oracle command-line interface.
 package cli
 
 import (

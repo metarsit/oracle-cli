@@ -1,4 +1,3 @@
-// internal/vault/format.go
 package vault
 
 import (

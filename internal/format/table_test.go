@@ -47,13 +47,13 @@ func checkGolden(t *testing.T, name string, got []byte) {
 	t.Helper()
 	path := filepath.Join("testdata", name)
 	if *update {
-		_ = os.MkdirAll("testdata", 0o755)
-		if err := os.WriteFile(path, got, 0o644); err != nil {
+		_ = os.MkdirAll("testdata", 0o750)                     //nolint:gosec // test-only golden file directory
+		if err := os.WriteFile(path, got, 0o600); err != nil { //nolint:gosec // test-only golden file write
 			t.Fatal(err)
 		}
 		return
 	}
-	want, err := os.ReadFile(path)
+	want, err := os.ReadFile(path) //nolint:gosec // path is constructed from a trusted test-data constant
 	if err != nil {
 		t.Fatalf("read golden %s: %v (run with -update)", name, err)
 	}

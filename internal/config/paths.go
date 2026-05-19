@@ -1,4 +1,3 @@
-// internal/config/paths.go
 package config
 
 import (
@@ -22,8 +21,8 @@ func configDir() string {
 	return filepath.Join(os.Getenv(envHome), ".config", appDir)
 }
 
-// ConfigPath returns the absolute path of config.toml.
-func ConfigPath() string { return filepath.Join(configDir(), configFile) }
+// Path returns the absolute path of config.toml.
+func Path() string { return filepath.Join(configDir(), configFile) }
 
 // VaultPath returns the absolute path of secrets.vault.
 func VaultPath() string { return filepath.Join(configDir(), vaultFile) }

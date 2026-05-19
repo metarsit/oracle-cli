@@ -1,4 +1,3 @@
-// internal/cli/instruments.go
 package cli
 
 import (

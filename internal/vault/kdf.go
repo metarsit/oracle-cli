@@ -1,4 +1,3 @@
-// internal/vault/kdf.go
 package vault
 
 import "golang.org/x/crypto/argon2"

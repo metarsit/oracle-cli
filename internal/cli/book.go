@@ -1,4 +1,3 @@
-// internal/cli/book.go
 package cli
 
 import (
