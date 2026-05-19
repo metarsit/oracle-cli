@@ -3,6 +3,7 @@ package cli
 
 import (
 	"bytes"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -137,6 +138,25 @@ func TestConfigSetUnknownKey(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "unknown config key") {
 		t.Errorf("err = %v", err)
+	}
+}
+
+func TestConfigPathFlagOverridesEnv(t *testing.T) {
+	dir := t.TempDir()
+	flagPath := filepath.Join(dir, "flag.toml")
+	envPath := filepath.Join(dir, "env.toml")
+	t.Setenv("ORACLE_CONFIG", envPath)
+
+	// write via flag path
+	if _, err := driveCmd(t, "config", "--config", flagPath, "set", "base_url", "https://from-flag"); err != nil {
+		t.Fatalf("set: %v", err)
+	}
+	// flag-path file must exist; env path must NOT
+	if _, err := os.Stat(flagPath); err != nil {
+		t.Errorf("flag path not created: %v", err)
+	}
+	if _, err := os.Stat(envPath); err == nil {
+		t.Errorf("env path should NOT have been used")
 	}
 }
 

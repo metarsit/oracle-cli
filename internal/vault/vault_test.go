@@ -147,6 +147,21 @@ func TestOpenMissingFile(t *testing.T) {
 	}
 }
 
+func TestSaveBadPath(t *testing.T) {
+	// pass a path under a file (so mkdirall fails)
+	dir := t.TempDir()
+	blocker := filepath.Join(dir, "blocker")
+	if err := os.WriteFile(blocker, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// blocker exists as a file; Save asks MkdirAll on its directory which is dir
+	// (already exists) and WriteFile on blocker/secrets.vault which fails.
+	err := Save(filepath.Join(blocker, "secrets.vault"), NewEmpty(), []byte("pw"))
+	if err == nil {
+		t.Fatal("expected save error when path is under a regular file")
+	}
+}
+
 func TestOpenBadVersion(t *testing.T) {
 	p := newPath(t)
 	hdr := header{

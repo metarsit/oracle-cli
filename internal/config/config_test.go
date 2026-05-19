@@ -2,7 +2,9 @@
 package config
 
 import (
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -44,5 +46,45 @@ func TestSaveFileRejectsSecretKeys(t *testing.T) {
 	err := SaveFile(filepath.Join(dir, "c.toml"), in)
 	if err == nil {
 		t.Fatal("expected error rejecting secret in config file")
+	}
+}
+
+func TestLoadFileMalformedTOML(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bad.toml")
+	if err := os.WriteFile(path, []byte("this = is = not = toml"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := LoadFile(path)
+	if err == nil {
+		t.Fatal("expected parse error")
+	}
+	if !strings.Contains(err.Error(), "parse config") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestLoadFileReadError(t *testing.T) {
+	// pass a directory rather than a file; ReadFile returns a non-os.ErrNotExist error.
+	dir := t.TempDir()
+	_, err := LoadFile(dir)
+	if err == nil {
+		t.Fatal("expected read error")
+	}
+	if !strings.Contains(err.Error(), "read config") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestSaveFileRejectsDeribitSecrets(t *testing.T) {
+	dir := t.TempDir()
+	for _, in := range []File{
+		{DeribitClientID: "leak"},
+		{DeribitClientSecret: "leak"},
+	} {
+		err := SaveFile(filepath.Join(dir, "c.toml"), in)
+		if err == nil {
+			t.Errorf("expected refusal for %+v", in)
+		}
 	}
 }
