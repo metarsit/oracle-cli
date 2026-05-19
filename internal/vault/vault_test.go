@@ -164,6 +164,45 @@ func TestOpenBadVersion(t *testing.T) {
 	}
 }
 
+// FuzzOpen ensures Open() never panics on arbitrary file contents under a
+// known passphrase. The seed corpus mixes empty, short, and header-length
+// blobs plus a real ciphertext. Extended runs require `go test -fuzz=FuzzOpen`.
+func FuzzOpen(f *testing.F) {
+	// build one real ciphertext to seed
+	tmp := f.TempDir()
+	good := filepath.Join(tmp, "good.vault")
+	v := NewEmpty()
+	v.Set("k", "v")
+	if err := Save(good, v, []byte("pw")); err != nil {
+		f.Fatal(err)
+	}
+	realBytes, err := os.ReadFile(good)
+	if err != nil {
+		f.Fatal(err)
+	}
+	seeds := [][]byte{
+		nil,
+		{},
+		{'O', 'C', 'L', 'I'},
+		make([]byte, headerLen),
+		make([]byte, headerLen+16),
+		realBytes,
+		append([]byte("OCLI"), make([]byte, 100)...),
+	}
+	for _, s := range seeds {
+		f.Add(s, []byte("pw"))
+	}
+	f.Fuzz(func(t *testing.T, raw, pass []byte) {
+		// Write to a fresh tempfile each call; Open must never panic.
+		dir := t.TempDir()
+		p := filepath.Join(dir, "fuzz.vault")
+		if err := os.WriteFile(p, raw, 0o600); err != nil {
+			t.Skip()
+		}
+		_, _ = Open(p, pass)
+	})
+}
+
 func TestRotateChangesPassphrase(t *testing.T) {
 	p := newPath(t)
 	v := NewEmpty()
