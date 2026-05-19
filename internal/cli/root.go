@@ -11,6 +11,9 @@ func NewRootCmd(version string) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	cmd.AddCommand(newVersionCmd(version))
+	cmd.AddCommand(
+		newVersionCmd(version),
+		newVaultCmd(),
+	)
 	return cmd
 }
