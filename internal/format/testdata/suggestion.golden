@@ -1,0 +1,13 @@
+┌─────────────────┬──────────┐
+│ FIELD           │ VALUE    │
+├─────────────────┼──────────┤
+│ asset           │ BTC      │
+│ chosen_expiry   │ T+1      │
+│ put_strike      │ 74000    │
+│ call_strike     │ 78500    │
+│ put_bid         │ 0.0023   │
+│ call_bid        │ 0.0009   │
+│ net_premium_usd │ 243.74   │
+│ annualised_roi  │ 0.693271 │
+│ skew_reason     │ flat     │
+└─────────────────┴──────────┘

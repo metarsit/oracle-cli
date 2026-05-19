@@ -20,6 +20,8 @@ func NewRenderer(name string) Renderer {
 		return jsonRenderer{}
 	case "yaml":
 		return yamlRenderer{}
+	case "table":
+		return tableRenderer{}
 	}
 	return jsonRenderer{}
 }
