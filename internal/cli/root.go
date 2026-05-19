@@ -33,6 +33,7 @@ func NewRootCmd(version string) *cobra.Command {
 		newSettleCmd(),
 		newHedgeCmd(),
 		newPositionsCmd(),
+		newPlanCmd(),
 	)
 	return cmd
 }
