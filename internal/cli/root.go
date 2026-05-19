@@ -34,6 +34,7 @@ func NewRootCmd(version string) *cobra.Command {
 		newHedgeCmd(),
 		newPositionsCmd(),
 		newPlanCmd(),
+		newDeribitCmd(),
 	)
 	return cmd
 }
