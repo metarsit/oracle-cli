@@ -22,6 +22,8 @@ func NewRootCmd(version string) *cobra.Command {
 		newVersionCmd(version),
 		newVaultCmd(),
 		newConfigCmd(),
+		newHealthCmd(),
+		newReadyCmd(),
 	)
 	return cmd
 }

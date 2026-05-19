@@ -1,0 +1,27 @@
+// internal/cli/ready.go
+package cli
+
+import (
+	"github.com/metarsit/oracle-cli/internal/client"
+	"github.com/metarsit/oracle-cli/internal/format"
+	"github.com/spf13/cobra"
+)
+
+func newReadyCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ready",
+		Short: "GET /readyz (no auth)",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cfg, err := bootstrap(cmd, false)
+			if err != nil {
+				return err
+			}
+			c := client.New(cfg.BaseURL, "", cfg.Timeout)
+			data, err := c.Ready(cmd.Context())
+			if err != nil {
+				return err
+			}
+			return format.NewRenderer(cfg.Output).Render(cmd.OutOrStdout(), data)
+		},
+	}
+}
