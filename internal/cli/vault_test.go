@@ -57,3 +57,115 @@ func TestVaultInitSetGetListRm(t *testing.T) {
 		t.Errorf("rm failed: %q", out)
 	}
 }
+
+// vaultRun is a small helper local to vault tests that mirrors the inline
+// `run` closure above but returns (stdout, stderr, err) without forcing the
+// caller to redeclare the boilerplate.
+func vaultRun(t *testing.T, args ...string) (string, string, error) {
+	t.Helper()
+	root := NewRootCmd("t")
+	var out, errBuf bytes.Buffer
+	root.SetOut(&out)
+	root.SetErr(&errBuf)
+	root.SetArgs(args)
+	err := root.Execute()
+	return out.String(), errBuf.String(), err
+}
+
+func TestVaultExportRequiresConfirm(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "secrets.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+
+	if _, _, err := vaultRun(t, "vault", "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	_, _, err := vaultRun(t, "vault", "export")
+	if err == nil {
+		t.Fatal("expected refusal without --confirm")
+	}
+	if !strings.Contains(err.Error(), "--confirm") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestVaultExportWithConfirmPrintsTOMLLines(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "secrets.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+
+	if _, _, err := vaultRun(t, "vault", "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, _, err := vaultRun(t, "vault", "set", "oracle_api_token", "tok-1"); err != nil {
+		t.Fatalf("set: %v", err)
+	}
+	if _, _, err := vaultRun(t, "vault", "set", "deribit_client_id", "cid-1"); err != nil {
+		t.Fatalf("set: %v", err)
+	}
+	out, _, err := vaultRun(t, "vault", "export", "--confirm")
+	if err != nil {
+		t.Fatalf("export: %v", err)
+	}
+	if !strings.Contains(out, `oracle_api_token = "tok-1"`) {
+		t.Errorf("export missing token line: %q", out)
+	}
+	if !strings.Contains(out, `deribit_client_id = "cid-1"`) {
+		t.Errorf("export missing cid line: %q", out)
+	}
+}
+
+func TestVaultInitRefusesIfExists(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "secrets.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+
+	if _, _, err := vaultRun(t, "vault", "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	_, _, err := vaultRun(t, "vault", "init")
+	if err == nil {
+		t.Fatal("expected init to refuse second time")
+	}
+	if !strings.Contains(err.Error(), "already exists") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestVaultGetUnknownKey(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "secrets.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+
+	if _, _, err := vaultRun(t, "vault", "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	_, _, err := vaultRun(t, "vault", "get", "nope")
+	if err == nil {
+		t.Fatal("expected error for unknown key")
+	}
+	if !strings.Contains(err.Error(), "not in vault") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestVaultRotateRequiresTTY(t *testing.T) {
+	// rotate uses TermPrompter directly with no env override. In non-TTY
+	// runs term.ReadPassword fails immediately; assert the documented
+	// behaviour rather than fake stdin (per task brief).
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "secrets.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+	if _, _, err := vaultRun(t, "vault", "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	_, _, err := vaultRun(t, "vault", "rotate")
+	if err == nil {
+		t.Fatal("expected rotate to fail in non-TTY environment")
+	}
+}
