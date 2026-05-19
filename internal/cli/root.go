@@ -11,6 +11,13 @@ func NewRootCmd(version string) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
+	cmd.PersistentFlags().String("base-url", "", "Oracle base URL (env ORACLE_BASE_URL)")
+	cmd.PersistentFlags().String("token", "", "Bearer token (env ORACLE_API_TOKEN; prefer env or vault)")
+	cmd.PersistentFlags().String("output", "", "Output format: json|table|yaml (env ORACLE_OUTPUT)")
+	cmd.PersistentFlags().String("timeout", "", "HTTP timeout (e.g. 10s)")
+	cmd.PersistentFlags().String("config", "", "Path to config.toml")
+	cmd.PersistentFlags().String("vault", "", "Path to secrets.vault")
+	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable debug logging on stderr")
 	cmd.AddCommand(
 		newVersionCmd(version),
 		newVaultCmd(),
