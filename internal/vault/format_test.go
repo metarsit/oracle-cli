@@ -41,3 +41,16 @@ func TestParseHeaderRejectsUnknownVersion(t *testing.T) {
 		t.Fatal("expected version error")
 	}
 }
+
+func TestParseHeaderRejectsUnknownKDF(t *testing.T) {
+	raw := header{version: currentVer, kdfID: 99, salt: make([]byte, saltLen), nonce: make([]byte, nonceLen)}.marshal()
+	if _, err := parseHeader(raw); err == nil {
+		t.Fatal("expected kdf error")
+	}
+}
+
+func TestParseHeaderTooShort(t *testing.T) {
+	if _, err := parseHeader(make([]byte, headerLen-1)); err == nil {
+		t.Fatal("expected truncated header error")
+	}
+}

@@ -153,6 +153,64 @@ func TestVaultGetUnknownKey(t *testing.T) {
 	}
 }
 
+func TestVaultListErrorWhenMissingVault(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "does-not-exist.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	_, _, err := vaultRun(t, "vault", "list")
+	if err == nil {
+		t.Fatal("expected error opening missing vault")
+	}
+}
+
+func TestVaultSetErrorWhenMissingVault(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "does-not-exist.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	_, _, err := vaultRun(t, "vault", "set", "k", "v")
+	if err == nil {
+		t.Fatal("expected error opening missing vault")
+	}
+}
+
+func TestVaultRmErrorWhenMissingVault(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "does-not-exist.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	_, _, err := vaultRun(t, "vault", "rm", "k")
+	if err == nil {
+		t.Fatal("expected error opening missing vault")
+	}
+}
+
+func TestVaultExportErrorWhenMissingVault(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("ORACLE_VAULT", filepath.Join(dir, "does-not-exist.vault"))
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	_, _, err := vaultRun(t, "vault", "export", "--confirm")
+	if err == nil {
+		t.Fatal("expected error opening missing vault")
+	}
+}
+
+func TestVaultPathFlagOverridesEnv(t *testing.T) {
+	dir := t.TempDir()
+	flagPath := filepath.Join(dir, "flag.vault")
+	envPath := filepath.Join(dir, "env.vault")
+	t.Setenv("ORACLE_VAULT", envPath)
+	t.Setenv("ORACLE_VAULT_PASSPHRASE", "pw")
+	t.Setenv("XDG_CONFIG_HOME", dir)
+	if _, _, err := vaultRun(t, "vault", "--vault", flagPath, "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, err := os.Stat(flagPath); err != nil {
+		t.Errorf("flag vault not created: %v", err)
+	}
+	if _, err := os.Stat(envPath); err == nil {
+		t.Errorf("env vault should not have been used")
+	}
+}
+
 func TestVaultRotateRequiresTTY(t *testing.T) {
 	// rotate uses TermPrompter directly with no env override. In non-TTY
 	// runs term.ReadPassword fails immediately; assert the documented

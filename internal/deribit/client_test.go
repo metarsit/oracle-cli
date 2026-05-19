@@ -82,6 +82,24 @@ func TestPositionsCurrencyPassedAsQuery(t *testing.T) {
 	}
 }
 
+func TestPositionsMalformedResultErrors(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/public/auth"):
+			_, _ = w.Write([]byte(`{"result":{"access_token":"abc","expires_in":900}}`))
+		case strings.HasSuffix(r.URL.Path, "/private/get_positions"):
+			// Result is a string instead of a list — second-level Unmarshal must error.
+			_, _ = w.Write([]byte(`{"result":"not-a-list"}`))
+		}
+	}))
+	defer srv.Close()
+	c := New(srv.URL, "cid", "csec", time.Second)
+	_, err := c.Positions(context.Background(), "BTC")
+	if err == nil {
+		t.Fatal("expected unmarshal error")
+	}
+}
+
 func TestAuthCachesToken(t *testing.T) {
 	calls := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

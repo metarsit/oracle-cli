@@ -33,14 +33,72 @@ func TestMain(m *testing.M) {
 	}
 	defer os.RemoveAll(dir)
 	binPath = filepath.Join(dir, "oracle_test_bin")
-	cmd := exec.Command("go", "build", "-o", binPath, ".")
+	// Build with -cover so the child process emits coverage units into the
+	// directory pointed at by GOCOVERDIR (set per-invocation in runBinary).
+	cmd := exec.Command("go", "build", "-cover", "-o", binPath, ".")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
-	os.Exit(m.Run())
+	// Per-test runs deposit cover-units into this temp dir.
+	covDir, err := os.MkdirTemp("", "oracle-cov-*")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(covDir)
+	coverDir = covDir
+	code := m.Run()
+	// If a coverage profile is being written, dump subprocess units into it
+	// so main.go isn't permanently at 0%.
+	if target := coverageProfileArg(); target != "" {
+		entries, _ := os.ReadDir(covDir)
+		if len(entries) > 0 {
+			dumpCmd := exec.Command("go", "tool", "covdata", "textfmt",
+				"-i="+covDir, "-o="+target+".sub")
+			_ = dumpCmd.Run()
+			// Append subprocess profile (skip mode line) onto main profile.
+			if extra, err := os.ReadFile(target + ".sub"); err == nil {
+				if main, err := os.OpenFile(target, os.O_APPEND|os.O_WRONLY, 0o644); err == nil {
+					// strip first line (mode: ...) of the extra profile
+					if i := bytesIndexNewline(extra); i >= 0 {
+						_, _ = main.Write(extra[i+1:])
+					}
+					_ = main.Close()
+				}
+				_ = os.Remove(target + ".sub")
+			}
+		}
+	}
+	os.Exit(code)
 }
+
+// coverageProfileArg returns the value of -test.coverprofile if set.
+func coverageProfileArg() string {
+	for i, a := range os.Args {
+		if a == "-test.coverprofile" && i+1 < len(os.Args) {
+			return os.Args[i+1]
+		}
+		const pfx = "-test.coverprofile="
+		if len(a) > len(pfx) && a[:len(pfx)] == pfx {
+			return a[len(pfx):]
+		}
+	}
+	return ""
+}
+
+func bytesIndexNewline(b []byte) int {
+	for i, c := range b {
+		if c == '\n' {
+			return i
+		}
+	}
+	return -1
+}
+
+// coverDir holds subprocess coverage units; non-empty only when binary was
+// built with -cover.
+var coverDir string
 
 // integrationOracle is a fake oracle that switches handlers by env var so
 // individual integration tests can replay specific status codes.
@@ -69,7 +127,11 @@ func integrationOracle(t *testing.T, status int, body string) *httptest.Server {
 func runBinary(t *testing.T, env []string, args ...string) (string, string, int) {
 	t.Helper()
 	cmd := exec.Command(binPath, args...)
-	cmd.Env = append(os.Environ(), env...)
+	envAll := append(os.Environ(), env...)
+	if coverDir != "" {
+		envAll = append(envAll, "GOCOVERDIR="+coverDir)
+	}
+	cmd.Env = envAll
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
